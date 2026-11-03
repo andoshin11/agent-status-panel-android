@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- A workspace waiting for the user, in the widget's style. A closed notification has about 48dp. -->
+<!-- A workspace waiting for the user, with the widget's marks on the system's own background, which
+     it has to blend with. A closed notification has about 48dp. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/widget_card"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingHorizontal="10dp"
-    android:paddingVertical="6dp">
+    android:paddingVertical="4dp">
 
     <TextView
         android:layout_width="14dp"
@@ -33,7 +32,7 @@
             android:ellipsize="end"
             android:includeFontPadding="false"
             android:maxLines="1"
-            android:textColor="@color/ms_foreground"
+            android:textColor="@color/notification_title"
             android:textSize="13sp"
             android:textStyle="bold" />
 
@@ -45,7 +44,7 @@
             android:ellipsize="end"
             android:includeFontPadding="false"
             android:maxLines="1"
-            android:textColor="@color/ms_muted"
+            android:textColor="@color/notification_text"
             android:textSize="12sp" />
     </LinearLayout>
 

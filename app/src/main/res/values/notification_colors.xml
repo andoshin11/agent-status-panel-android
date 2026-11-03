@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- A notification sits on the system's background, which follows the phone's theme. -->
+    <color name="notification_title">#171717</color>
+    <color name="notification_text">#5C5C5C</color>
+</resources>
