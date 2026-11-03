@@ -19,7 +19,6 @@ import android.provider.Settings
 import android.view.View
 import android.view.WindowInsets
 import android.widget.Button
-import android.widget.FrameLayout
 import android.widget.TextView
 import com.google.firebase.messaging.FirebaseMessaging
 
@@ -59,7 +58,6 @@ class MainActivity : Activity() {
     override fun onResume() {
         super.onResume()
         showStatus()
-        showWidget()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -83,15 +81,6 @@ class MainActivity : Activity() {
             },
         )
         findViewById<Button>(R.id.open_live_updates).visibility = if (supported) View.VISIBLE else View.GONE
-    }
-
-    /** Draws what the widget shows now, with the same code. */
-    private fun showWidget() {
-        val host = findViewById<FrameLayout>(R.id.widget_host)
-        host.removeAllViews()
-        val heightDp = host.layoutParams.height / resources.displayMetrics.density
-        val sessions = SessionStore(this).read(System.currentTimeMillis())
-        host.addView(WidgetRenderer(this).render(sessions, heightDp.toInt()).apply(this, host))
     }
 
     private fun addWidget() {
