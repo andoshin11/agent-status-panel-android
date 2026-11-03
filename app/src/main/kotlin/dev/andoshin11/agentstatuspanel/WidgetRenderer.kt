@@ -43,6 +43,8 @@ class WidgetRenderer(private val context: Context) {
         views.setTextViewText(R.id.agent, label?.first.orEmpty())
         label?.let { views.setTextColor(R.id.agent, it.second) }
 
+        // A workspace that only waits for the user has no list to show, as in the panel.
+        views.setViewVisibility(R.id.card, if (session.total == 0) View.GONE else View.VISIBLE)
         views.setViewVisibility(R.id.goal, if (session.goal.isEmpty()) View.GONE else View.VISIBLE)
         views.setTextViewText(R.id.goal, session.goal)
         views.setTextViewText(R.id.count, context.getString(R.string.widget_count, session.done, session.total))
@@ -54,6 +56,7 @@ class WidgetRenderer(private val context: Context) {
     }
 
     private fun label(session: WidgetSession): Pair<String, Int>? = when {
+        session.attention.isNotEmpty() -> context.getString(R.string.widget_attention) to color(R.color.ms_todo)
         session.finished -> context.getString(R.string.widget_finished) to color(R.color.ms_done)
         session.running -> context.getString(R.string.widget_working) to color(R.color.ms_working)
         else -> null

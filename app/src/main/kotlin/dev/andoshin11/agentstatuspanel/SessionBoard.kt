@@ -16,6 +16,7 @@ data class WidgetSession(
     val total: Int,
     val tasks: List<TaskRow>,
     val live: Boolean = true,
+    val attention: String = "",
 ) {
     /** A task in progress turns the dot orange, as in the panel. */
     val running: Boolean
@@ -34,6 +35,7 @@ object SessionBoard {
         val others = sessions.filter { it.id != message.id }
         return when (message) {
             is ProgressMessage.Ended -> others
+            is ProgressMessage.Attention -> sessions
             is ProgressMessage.Update -> others + WidgetSession(
                 id = message.id,
                 firstSeen = sessions.firstOrNull { it.id == message.id }?.firstSeen ?: message.at,
@@ -46,6 +48,7 @@ object SessionBoard {
                 total = message.total,
                 tasks = message.tasks,
                 live = message.live,
+                attention = message.attention,
             )
         }
     }
@@ -53,12 +56,12 @@ object SessionBoard {
     fun fresh(sessions: List<WidgetSession>, now: Long) = sessions.filter { now - it.at <= STALE_MS }
 
     /**
-     * Unfinished sessions first, then the finished ones. Within each, live sessions come before
+     * Sessions waiting for the user first, then unfinished ones, then finished ones. Within each, live sessions come before
      * idle ones, so today's work is not buried under a list left for days, and then the order they
      * appeared. Sorting by activity would make the list jump while it is being scrolled.
      */
     fun ordered(sessions: List<WidgetSession>) =
-        sessions.sortedWith(compareBy({ it.finished }, { !it.live }, { it.firstSeen }))
+        sessions.sortedWith(compareBy({ it.attention.isEmpty() }, { it.finished }, { !it.live }, { it.firstSeen }))
 
     fun toJson(sessions: List<WidgetSession>): String = JSONArray(
         sessions.map { session ->
@@ -73,6 +76,7 @@ object SessionBoard {
                 .put("done", session.done)
                 .put("total", session.total)
                 .put("live", session.live)
+                .put("attention", session.attention)
                 .put("tasks", JSONArray(session.tasks.map { JSONArray(listOf(it.status.code, it.subject)) }))
         },
     ).toString()
@@ -93,6 +97,7 @@ object SessionBoard {
                 done = item.getInt("done"),
                 total = item.getInt("total"),
                 live = item.optBoolean("live", true),
+                attention = item.optString("attention"),
                 tasks = List(tasks.length()) { row ->
                     val task = tasks.getJSONArray(row)
                     TaskRow(TaskStatus.fromCode(task.getString(0)), task.getString(1))

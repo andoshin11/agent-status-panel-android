@@ -35,6 +35,16 @@ sealed interface ProgressMessage {
         val tasks: List<TaskRow> = emptyList(),
         /** False for a session left idle. The widget lists these below the ones moving now. */
         val live: Boolean = true,
+        /** Why an agent here waits for the user, or empty. */
+        val attention: String = "",
+    ) : ProgressMessage
+
+    /** An agent started waiting for the user. An [Ended] with the same id says it stopped. */
+    data class Attention(
+        override val id: String,
+        override val at: Long,
+        val workspace: String,
+        val reason: String,
     ) : ProgressMessage
 
     companion object {
@@ -47,6 +57,7 @@ sealed interface ProgressMessage {
             val at = data["at"]?.toLongOrNull() ?: return null
             return when (data["state"]) {
                 "ended" -> Ended(id, at)
+                "attention" -> Attention(id, at, data["workspace"].orEmpty(), data["reason"].orEmpty())
                 "active", "finished" -> {
                     val done = data["done"]?.toIntOrNull()?.takeIf { it >= 0 } ?: return null
                     val total = data["total"]?.toIntOrNull()?.takeIf { it >= done } ?: return null
@@ -62,6 +73,7 @@ sealed interface ProgressMessage {
                         total = total,
                         tasks = parseTasks(data["tasks"]),
                         live = data["live"] != "0",
+                        attention = data["attention"].orEmpty(),
                     )
                 }
                 else -> null

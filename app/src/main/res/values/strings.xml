@@ -5,6 +5,7 @@
     <string name="widget_description">実行中のすべてのセッションのタスクを、Milestone と同じ見た目で表示します</string>
     <string name="widget_empty">実行中のセッションはありません</string>
     <string name="widget_milestones">マイルストーン</string>
+    <string name="widget_attention">要確認</string>
     <string name="widget_working">作業中</string>
     <string name="widget_finished">完了</string>
     <string name="widget_session_default">セッション</string>
@@ -16,6 +17,17 @@
     <string name="add_widget">ホーム画面に追加する</string>
 
     <string name="open_battery">電池の最適化の設定を開く</string>
+
+    <string name="section_notifications">通知</string>
+    <string name="notifications_on">許可済み: エージェントが操作を待っているときに通知します</string>
+    <string name="notifications_off">未許可: エージェントが操作を待っていても通知できません</string>
+    <string name="allow_notifications">通知を許可する</string>
+    <string name="channel_attention">操作の依頼</string>
+    <string name="agent_default">エージェント</string>
+    <string name="attention_waiting">入力を待っています</string>
+    <string name="attention_permission">許可を待っています</string>
+    <string name="attention_blocked">ブロックされています</string>
+    <string name="attention_default">操作を待っています</string>
 
     <string name="section_token">FCM 登録トークン</string>
     <string name="token_help">Mac mini の config.json の deviceTokens に設定します。</string>
