@@ -1,30 +1,51 @@
-# agent-status-panel-app
+# agent-status-panel-android
 
-Claude Code と Codex の作業の進捗をスマートフォンで受け取るアプリです。送信側は [agent-status-panel](https://github.com/andoshin11/agent-status-panel) です。
+Claude Code と Codex の作業の進捗を、Android の [Live Updates](https://developer.android.com/develop/ui/views/notifications/live-update) で受け取るネイティブアプリ（Kotlin）です。送信側は [agent-status-panel](https://github.com/andoshin11/agent-status-panel) です。
 
-> [!NOTE]
-> まだアプリのコードはありません。Flutter で、Android から先に作る予定です。
+## できること
 
-## 予定
+- セッションごとに通知を 1 つ出して、ゴール、実行中のステップ、完了数を表示します。
+- タスク数に応じて区切った進捗バーと、ステータスバーのチップに `2/5` のような完了数を表示します。
+- 全タスクが完了すると、音の鳴る通常の通知に置き換えます。セッションが終わると通知を消します。
+- 順序が前後して届いた古いメッセージは捨てます。自分で閉じた Live Update は、そのセッションが完了するか終わるまで出しません。
+- Mac mini が止まって終了の連絡が来なくても、更新のない通知は 3 時間で消えます。
 
-| | Android | iOS |
-|---|---|---|
-| 順番 | 先に対応 | Android のあとに対応 |
-| 表示 | Live Updates（Android 16 以降） | Live Activity（iOS 16.1 以降） |
-| 表示部分の実装 | Kotlin（`Notification.ProgressStyle`） | SwiftUI（Widget Extension） |
-| 更新の経路 | FCM のデータメッセージを受けて、同じ通知を更新する | FCM 経由の APNs 配信で、アプリを起動せずに更新する |
-| 必要なもの | 実機（Android 16 以降） | 実機、Apple Developer Program |
+## 必要なもの
 
-一覧画面や設定など、通知以外の画面は Flutter で共通にします。Live Updates と Live Activity の見た目はそれぞれの OS のネイティブコードで作ります。
+- Android 13 以上。Live Updates は Android 16 以上で、それより古い端末では通常の通知になります。
+- JDK 21 と Android SDK（Platform 36）
+- Firebase プロジェクトに登録した Android アプリの `google-services.json`
+
+`google-services.json` はリポジトリに入れません。Firebase コンソールから取得して、`app/` に置いてください。CI はダミーの `ci/google-services.json` でビルドします。
+
+## ビルドとインストール
+
+```sh
+./gradlew installDebug
+```
+
+## 設定
+
+1. アプリを開いて、通知を許可します。
+2. **Live Updates** の表示が「利用可能」になっているか確かめます。オフなら設定を開いて有効にします。
+3. **プレビュー通知** で、30 秒間の表示を確かめます。
+4. 表示された FCM 登録トークンをコピーして、Mac mini の `config.json` の `deviceTokens` に設定します。
+
+### Galaxy（One UI）の場合
+
+Now Bar に出るかどうかは、One UI の版と設定によって変わる可能性があります。ベータ版の One UI 8 では、開発者オプションの「Live notifications for all apps」を有効にする必要があったと報じられています。
+
+通知が遅れるときは、**電池の最適化の設定を開く** からこのアプリを最適化の対象外にしてください。
 
 ## 受け取るメッセージ
 
-FCM のデータメッセージの形式は、送信側の [README](https://github.com/andoshin11/agent-status-panel#送る内容) にあります。アプリでは次のように扱います。
+FCM のデータメッセージの形式は、送信側の [README](https://github.com/andoshin11/agent-status-panel#送る内容) にあります。
 
-- `id` ごとに通知を 1 つ表示します。
-- `at` が、その `id` で最後に受けたものより古いメッセージは捨てます。FCM は順序を保証しないためです。
-- `active` は進行中の通知にします。`finished` は通常の通知に置き換えて、`ended` は通知を消します。
-- `v` が知らない値のメッセージは無視します。
+## 開発
+
+```sh
+./gradlew testDebugUnitTest lintDebug assembleDebug
+```
 
 ## ライセンス
 
