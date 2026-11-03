@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- A workspace waiting for the user, with the widget's marks on the system's own background, which
+<!-- A workspace waiting for the user, with the widget's badge on the system's own background, which
      it has to blend with. A closed notification has about 48dp. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -7,17 +7,6 @@
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:paddingVertical="4dp">
-
-    <TextView
-        android:layout_width="14dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:gravity="center"
-        android:includeFontPadding="false"
-        android:text="@string/mark_in_progress"
-        android:textColor="@color/ms_todo"
-        android:textSize="13sp"
-        android:textStyle="bold" />
 
     <LinearLayout
         android:layout_width="0dp"
