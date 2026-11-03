@@ -48,15 +48,10 @@ object SessionBoard {
     fun fresh(sessions: List<WidgetSession>, now: Long) = sessions.filter { now - it.at <= STALE_MS }
 
     /**
-     * The newest session at work gets the card. The rest keep the order they appeared in, since
-     * sorting them by activity would make the rows jump.
+     * Sessions at work first, then the finished ones, each in the order they appeared. Sorting by
+     * activity would make the list jump while it is being scrolled.
      */
-    fun arrange(sessions: List<WidgetSession>): Arrangement? {
-        val main = sessions.filter { !it.finished }.maxByOrNull { it.at }
-            ?: sessions.maxByOrNull { it.at }
-            ?: return null
-        return Arrangement(main, sessions.filter { it.id != main.id }.sortedBy { it.firstSeen })
-    }
+    fun ordered(sessions: List<WidgetSession>) = sessions.sortedWith(compareBy({ it.finished }, { it.firstSeen }))
 
     fun toJson(sessions: List<WidgetSession>): String = JSONArray(
         sessions.map { session ->
@@ -96,34 +91,4 @@ object SessionBoard {
             )
         }
     }
-}
-
-data class Arrangement(val main: WidgetSession, val others: List<WidgetSession>)
-
-/** What fits in a widget of some height. */
-data class WidgetFit(val taskStart: Int, val taskCount: Int, val otherCount: Int)
-
-// In dp, measured on the device: padding, header, the card's padding, a two-line goal, count and bar.
-private const val BASE_HEIGHT = 24 + 32 + 20 + 44 + 20
-private const val TASK_HEIGHT = 23
-private const val OTHERS_HEADER_HEIGHT = 41
-private const val ROW_HEIGHT = 34
-private const val OTHERS_SHARE = 0.45
-
-/**
- * Other sessions must not go unseen, so at least one row shows when there is room for it and two
- * tasks. Beyond that the rows take at most part of the space. The tasks shown are those around the
- * current one.
- */
-fun fitWidget(heightDp: Int, tasks: List<TaskRow>, others: Int): WidgetFit {
-    var space = heightDp - BASE_HEIGHT
-    val firstRow = OTHERS_HEADER_HEIGHT + ROW_HEIGHT
-    val shared = ((space * OTHERS_SHARE - OTHERS_HEADER_HEIGHT) / ROW_HEIGHT).toInt()
-    val wantedRows = if (space >= firstRow + 2 * TASK_HEIGHT) shared.coerceAtLeast(1) else 0
-    val rows = wantedRows.coerceIn(0, others)
-    if (rows > 0) space -= OTHERS_HEADER_HEIGHT + rows * ROW_HEIGHT
-    val count = (space / TASK_HEIGHT).coerceIn(0, tasks.size)
-    val unfinished = tasks.indexOfFirst { it.status != TaskStatus.COMPLETED }
-    val wanted = if (unfinished == -1) tasks.size - count else unfinished - 1
-    return WidgetFit(wanted.coerceIn(0, tasks.size - count), count, rows)
 }

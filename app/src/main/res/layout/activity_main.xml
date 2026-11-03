@@ -60,12 +60,6 @@
             android:text="@string/section_widget"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
-        <FrameLayout
-            android:id="@+id/widget_host"
-            android:layout_width="match_parent"
-            android:layout_height="320dp"
-            android:layout_marginTop="8dp" />
-
         <Button
             android:id="@+id/add_widget"
             android:layout_width="wrap_content"
