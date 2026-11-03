@@ -47,6 +47,16 @@ class SessionLedgerTest {
     }
 
     @Test
+    fun `a message that is not live removes the notification and keeps a dismissal`() {
+        val ledger = ledger()
+        ledger.decide(update(1))
+        ledger.markDismissed("a")
+        val idle = ProgressMessage.Update("a", 2, false, "claude", "w", "g", "s", 1, 2, live = false)
+        assertEquals(SessionLedger.Decision.REMOVE, ledger.decide(idle))
+        assertEquals(SessionLedger.Decision.HIDE, ledger.decide(update(3)))
+    }
+
+    @Test
     fun `old entries are removed`() {
         val ledger = SessionLedger(mapOf("old" to 1L, "new" to 100L), setOf("old"))
         ledger.prune(50)

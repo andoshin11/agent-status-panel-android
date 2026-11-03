@@ -22,6 +22,7 @@ class SessionLedger(entries: Map<String, Long>, dismissed: Set<String>) {
                 dismissedIds.remove(message.id)
                 Decision.REMOVE
             }
+            message is ProgressMessage.Update && !message.live -> Decision.REMOVE
             message is ProgressMessage.Update && message.finished -> {
                 dismissedIds.remove(message.id)
                 Decision.SHOW
@@ -41,6 +42,6 @@ class SessionLedger(entries: Map<String, Long>, dismissed: Set<String>) {
         dismissedIds.removeAll(old)
     }
 
-    /** HIDE is an up-to-date message with no notification: the widget still follows the session. */
+    /** REMOVE and HIDE leave no notification. The widget still follows any session not ended. */
     enum class Decision { SHOW, REMOVE, HIDE, IGNORE }
 }

@@ -15,6 +15,7 @@ data class WidgetSession(
     val done: Int,
     val total: Int,
     val tasks: List<TaskRow>,
+    val live: Boolean = true,
 ) {
     /** A task in progress turns the dot orange, as in the panel. */
     val running: Boolean
@@ -23,8 +24,11 @@ data class WidgetSession(
 
 /** The sessions the widget shows. Pure, so it can be tested without a device. */
 object SessionBoard {
-    /** If the Mac mini goes away, nothing would end these. The same time as the notification. */
-    const val STALE_MS = 3L * 60 * 60 * 1000
+    /**
+     * If the Mac mini goes away, nothing would end these. An unchanged session gets no new messages,
+     * but the sender ends it within 7 days, so this only has to be longer than that.
+     */
+    const val STALE_MS = 8L * 24 * 60 * 60 * 1000
 
     fun apply(sessions: List<WidgetSession>, message: ProgressMessage): List<WidgetSession> {
         val others = sessions.filter { it.id != message.id }
@@ -41,6 +45,7 @@ object SessionBoard {
                 done = message.done,
                 total = message.total,
                 tasks = message.tasks,
+                live = message.live,
             )
         }
     }
@@ -48,10 +53,12 @@ object SessionBoard {
     fun fresh(sessions: List<WidgetSession>, now: Long) = sessions.filter { now - it.at <= STALE_MS }
 
     /**
-     * Sessions at work first, then the finished ones, each in the order they appeared. Sorting by
-     * activity would make the list jump while it is being scrolled.
+     * Unfinished sessions first, then the finished ones. Within each, live sessions come before
+     * idle ones, so today's work is not buried under a list left for days, and then the order they
+     * appeared. Sorting by activity would make the list jump while it is being scrolled.
      */
-    fun ordered(sessions: List<WidgetSession>) = sessions.sortedWith(compareBy({ it.finished }, { it.firstSeen }))
+    fun ordered(sessions: List<WidgetSession>) =
+        sessions.sortedWith(compareBy({ it.finished }, { !it.live }, { it.firstSeen }))
 
     fun toJson(sessions: List<WidgetSession>): String = JSONArray(
         sessions.map { session ->
@@ -65,6 +72,7 @@ object SessionBoard {
                 .put("step", session.step)
                 .put("done", session.done)
                 .put("total", session.total)
+                .put("live", session.live)
                 .put("tasks", JSONArray(session.tasks.map { JSONArray(listOf(it.status.code, it.subject)) }))
         },
     ).toString()
@@ -84,6 +92,7 @@ object SessionBoard {
                 step = item.getString("step"),
                 done = item.getInt("done"),
                 total = item.getInt("total"),
+                live = item.optBoolean("live", true),
                 tasks = List(tasks.length()) { row ->
                     val task = tasks.getJSONArray(row)
                     TaskRow(TaskStatus.fromCode(task.getString(0)), task.getString(1))
