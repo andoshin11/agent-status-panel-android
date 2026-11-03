@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 
@@ -19,11 +20,20 @@ class AttentionNotifier(private val context: Context) {
         context.getSystemService(NotificationManager::class.java).createNotificationChannel(
             NotificationChannel(CHANNEL, context.getString(R.string.channel_attention), NotificationManager.IMPORTANCE_HIGH),
         )
+        val title = message.workspace.ifEmpty { context.getString(R.string.agent_default) }
+        val text = context.getString(reason(message.reason))
+        val card = RemoteViews(context.packageName, R.layout.notification_attention).apply {
+            setTextViewText(R.id.workspace, title)
+            setTextViewText(R.id.reason, text)
+        }
         val notification = NotificationCompat.Builder(context, CHANNEL)
             .setSmallIcon(R.drawable.ic_notification)
             .setColor(context.getColor(R.color.ms_todo))
-            .setContentTitle(message.workspace.ifEmpty { context.getString(R.string.agent_default) })
-            .setContentText(context.getString(reason(message.reason)))
+            .setContentTitle(title)
+            .setContentText(text)
+            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+            .setCustomContentView(card)
+            .setCustomHeadsUpContentView(card)
             .setContentIntent(openApp())
             .setAutoCancel(true)
             // The reason can change while the agent still waits; that is not a new request.

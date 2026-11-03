@@ -1,0 +1,5 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- The panel's badge: its status color at 18% -->
+    <solid android:color="#2EFF6900" />
+    <corners android:radius="4dp" />
+</shape>
