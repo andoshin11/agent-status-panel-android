@@ -24,7 +24,10 @@ class WidgetRenderer(private val context: Context) {
         val items = RemoteViews.RemoteCollectionItems.Builder()
             .setHasStableIds(true)
             .setViewTypeCount(1)
-        SessionBoard.ordered(sessions).forEach { items.addItem(it.id.hashCode().toLong(), session(it)) }
+        SessionBoard.ordered(sessions).forEach { session ->
+            val item = session(session).apply { setOnClickFillInIntent(R.id.session, Intent()) }
+            items.addItem(session.id.hashCode().toLong(), item)
+        }
         views.setRemoteAdapter(R.id.list, items.build())
         views.setViewVisibility(R.id.empty, if (sessions.isEmpty()) View.VISIBLE else View.GONE)
         // Items of a list take their click from this template. It stays mutable for their fill-in.
@@ -33,9 +36,27 @@ class WidgetRenderer(private val context: Context) {
         return views
     }
 
+    /**
+     * A finished session's card for an open notification. The system gives its content about 252dp,
+     * so the goal and the list are cut to what fits, and the list keeps its last tasks.
+     */
+    fun notificationCard(session: WidgetSession): RemoteViews {
+        val views = session(session.copy(tasks = session.tasks.takeLast(NOTIFICATION_TASKS)))
+        views.setInt(R.id.goal, "setMaxLines", NOTIFICATION_GOAL_LINES)
+        return views
+    }
+
+    /** The same session for a closed notification. */
+    fun notificationSummary(session: WidgetSession): RemoteViews {
+        val views = RemoteViews(packageName, R.layout.notification_compact)
+        views.setTextViewText(R.id.goal, session.goal.ifEmpty { session.workspace })
+        views.setTextViewText(R.id.count, context.getString(R.string.widget_count, session.done, session.total))
+        views.setProgressBar(R.id.bar, session.total.coerceAtLeast(1), session.done, false)
+        return views
+    }
+
     private fun session(session: WidgetSession): RemoteViews {
         val views = RemoteViews(packageName, R.layout.widget_session)
-        views.setOnClickFillInIntent(R.id.session, Intent())
         views.setTextViewText(R.id.workspace, session.workspace.ifEmpty { context.getString(R.string.widget_session_default) })
         val label = label(session)
         views.setTextViewText(R.id.agent, label?.first.orEmpty())
@@ -89,4 +110,9 @@ class WidgetRenderer(private val context: Context) {
         Intent(context, MainActivity::class.java),
         mutability or PendingIntent.FLAG_UPDATE_CURRENT,
     )
+
+    private companion object {
+        const val NOTIFICATION_TASKS = 5
+        const val NOTIFICATION_GOAL_LINES = 2
+    }
 }

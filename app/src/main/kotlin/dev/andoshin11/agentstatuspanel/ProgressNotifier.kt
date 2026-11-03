@@ -10,7 +10,10 @@ import android.Manifest
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 
-/** Shows one notification per session: a Live Update while it works, a plain one once finished. */
+/**
+ * Shows one notification per session: a Live Update while it works, the widget's card once finished.
+ * A Live Update cannot have a custom layout, so only its colors follow the widget.
+ */
 class ProgressNotifier(private val context: Context) {
     private val manager = NotificationManagerCompat.from(context)
 
@@ -30,7 +33,11 @@ class ProgressNotifier(private val context: Context) {
     private fun active(message: ProgressMessage.Update): NotificationCompat.Builder {
         val style = NotificationCompat.ProgressStyle()
             .setStyledByProgress(true)
-            .setProgressSegments(progressSegments(message.total).map { NotificationCompat.ProgressStyle.Segment(it) })
+            .setProgressSegments(
+                progressSegments(message.total).map {
+                    NotificationCompat.ProgressStyle.Segment(it).setColor(context.getColor(R.color.ms_bar))
+                },
+            )
             .setProgress(message.done)
         return base(message, CHANNEL_PROGRESS)
             .setStyle(style)
@@ -46,13 +53,21 @@ class ProgressNotifier(private val context: Context) {
             .setDeleteIntent(dismissIntent(message.id))
     }
 
-    private fun finished(message: ProgressMessage.Update) = base(message, CHANNEL_FINISHED)
-        .setContentText(context.getString(R.string.finished_text, "${message.done}", "${message.total}"))
-        .setSubText(message.workspace.ifEmpty { null })
-        .setAutoCancel(true)
+    private fun finished(message: ProgressMessage.Update): NotificationCompat.Builder {
+        val session = SessionBoard.apply(emptyList(), message).single()
+        val renderer = WidgetRenderer(context)
+        return base(message, CHANNEL_FINISHED)
+            .setContentText(context.getString(R.string.finished_text, "${message.done}", "${message.total}"))
+            .setSubText(message.workspace.ifEmpty { null })
+            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+            .setCustomContentView(renderer.notificationSummary(session))
+            .setCustomBigContentView(renderer.notificationCard(session))
+            .setAutoCancel(true)
+    }
 
     private fun base(message: ProgressMessage.Update, channel: String) = NotificationCompat.Builder(context, channel)
         .setSmallIcon(R.drawable.ic_notification)
+        .setColor(context.getColor(R.color.ms_bar))
         .setContentTitle(title(message))
         .setContentIntent(openApp())
 
