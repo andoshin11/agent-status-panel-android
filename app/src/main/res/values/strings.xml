@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Agent Status Panel</string>
-    <string name="channel_progress">作業中の進捗</string>
-    <string name="channel_finished">作業の完了</string>
-    <string name="agent_default">エージェント</string>
-    <string name="finished_text">完了しました（%1$s/%2$s）</string>
-    <string name="progress_text">%1$s/%2$s 完了</string>
 
     <string name="widget_description">実行中のすべてのセッションのタスクを、Milestone と同じ見た目で表示します</string>
     <string name="widget_empty">実行中のセッションはありません</string>
@@ -20,18 +15,7 @@
     <string name="section_widget">ウィジェット</string>
     <string name="add_widget">ホーム画面に追加する</string>
 
-    <string name="section_status">状態</string>
-    <string name="notifications_on">通知: 許可済み</string>
-    <string name="notifications_off">通知: 未許可</string>
-    <string name="live_updates_on">Live Updates: 利用可能</string>
-    <string name="live_updates_off">Live Updates: オフ</string>
-    <string name="live_updates_unsupported">Live Updates: この Android では使えません（通常の通知で表示します）</string>
-    <string name="allow_notifications">通知を許可する</string>
-    <string name="open_live_updates">Live Updates の設定を開く</string>
     <string name="open_battery">電池の最適化の設定を開く</string>
-    <string name="preview">プレビュー通知を表示する</string>
-    <string name="preview_goal">プレビュー: 通知の表示を確かめる</string>
-    <string name="preview_step">表示を確認しています</string>
 
     <string name="section_token">FCM 登録トークン</string>
     <string name="token_help">Mac mini の config.json の deviceTokens に設定します。</string>

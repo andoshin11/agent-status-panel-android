@@ -13,13 +13,12 @@ class LedgerStore(context: Context) {
             .filterKeys { it.startsWith(AT_PREFIX) }
             .mapNotNull { (key, value) -> (value as? Long)?.let { key.removePrefix(AT_PREFIX) to it } }
             .toMap()
-        val ledger = SessionLedger(entries, prefs.getStringSet(DISMISSED, emptySet()).orEmpty())
+        val ledger = SessionLedger(entries)
         val result = change(ledger)
         ledger.prune(now - RETENTION_MS)
         prefs.edit {
             clear()
             ledger.entries.forEach { (id, at) -> putLong(AT_PREFIX + id, at) }
-            putStringSet(DISMISSED, ledger.dismissed.toSet())
         }
         result
     }
@@ -29,7 +28,6 @@ class LedgerStore(context: Context) {
     private companion object {
         val LOCK = Any()
         const val AT_PREFIX = "at:"
-        const val DISMISSED = "dismissed"
         const val TOKEN = "fcm_token"
         const val RETENTION_MS = 7L * 24 * 60 * 60 * 1000
     }

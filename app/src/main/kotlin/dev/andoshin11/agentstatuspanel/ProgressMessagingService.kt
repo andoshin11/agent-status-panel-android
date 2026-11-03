@@ -10,15 +10,9 @@ class ProgressMessagingService : FirebaseMessagingService() {
 
     override fun onMessageReceived(remote: RemoteMessage) {
         val message = ProgressMessage.parse(remote.data) ?: return
-        val decision = LedgerStore(this).update(System.currentTimeMillis()) { it.decide(message) }
-        if (decision == SessionLedger.Decision.IGNORE) return
-        val notifier = ProgressNotifier(this)
-        when (decision) {
-            SessionLedger.Decision.SHOW -> notifier.show(message as ProgressMessage.Update)
-            SessionLedger.Decision.REMOVE -> notifier.remove(message.id)
-            else -> Unit
-        }
-        SessionStore(this).apply(message, System.currentTimeMillis())
+        val now = System.currentTimeMillis()
+        if (!LedgerStore(this).update(now) { it.accept(message) }) return
+        SessionStore(this).apply(message, now)
         AgentWidgetProvider.refresh(this)
     }
 }
