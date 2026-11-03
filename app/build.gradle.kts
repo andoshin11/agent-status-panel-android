@@ -11,8 +11,8 @@ android {
         applicationId = "dev.andoshin11.agentstatuspanel"
         minSdk = 33
         targetSdk = 36
-        versionCode = 9
-        versionName = "0.6.2"
+        versionCode = 13
+        versionName = "0.6.6"
     }
 
     compileOptions {
