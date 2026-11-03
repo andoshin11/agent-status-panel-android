@@ -3,9 +3,11 @@ package dev.andoshin11.agentstatuspanel
 import android.Manifest
 import android.app.Activity
 import android.app.NotificationManager
+import android.appwidget.AppWidgetManager
 import android.content.ClipData
 import android.content.ClipDescription
 import android.content.ClipboardManager
+import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -17,6 +19,7 @@ import android.provider.Settings
 import android.view.View
 import android.view.WindowInsets
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.TextView
 import com.google.firebase.messaging.FirebaseMessaging
 
@@ -49,12 +52,14 @@ class MainActivity : Activity() {
         }
         findViewById<Button>(R.id.preview).setOnClickListener { showPreview() }
         findViewById<Button>(R.id.copy_token).setOnClickListener { copyToken() }
+        findViewById<Button>(R.id.add_widget).setOnClickListener { addWidget() }
         loadToken()
     }
 
     override fun onResume() {
         super.onResume()
         showStatus()
+        showWidget()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -78,6 +83,22 @@ class MainActivity : Activity() {
             },
         )
         findViewById<Button>(R.id.open_live_updates).visibility = if (supported) View.VISIBLE else View.GONE
+    }
+
+    /** Draws what the widget shows now, with the same code. */
+    private fun showWidget() {
+        val host = findViewById<FrameLayout>(R.id.widget_host)
+        host.removeAllViews()
+        val heightDp = host.layoutParams.height / resources.displayMetrics.density
+        val sessions = SessionStore(this).read(System.currentTimeMillis())
+        host.addView(WidgetRenderer(this).render(sessions, heightDp.toInt()).apply(this, host))
+    }
+
+    private fun addWidget() {
+        val manager = getSystemService(AppWidgetManager::class.java)
+        if (manager.isRequestPinAppWidgetSupported) {
+            manager.requestPinAppWidget(ComponentName(this, AgentWidgetProvider::class.java), null, null)
+        }
     }
 
     private fun loadToken() {

@@ -33,7 +33,7 @@ class SessionLedgerTest {
         val ledger = ledger()
         ledger.decide(update(10))
         ledger.markDismissed("a")
-        assertEquals(Decision.IGNORE, ledger.decide(update(20)))
+        assertEquals(Decision.HIDE, ledger.decide(update(20)))
         assertEquals(Decision.SHOW, ledger.decide(update(30, finished = true)))
         assertEquals(Decision.SHOW, ledger.decide(update(40)))
     }

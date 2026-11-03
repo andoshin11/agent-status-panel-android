@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The dark theme of the Milestone panel. The first group is Orca's dark theme tokens. -->
+    <color name="ms_background">#0A0A0A</color>
+    <color name="ms_card">#171717</color>
+    <color name="ms_foreground">#F0F0F0</color>
+    <color name="ms_muted">#ACACAC</color>
+    <color name="ms_border">#12FFFFFF</color>
+    <!-- The panel's status hues, from oklch to sRGB. The track is the foreground at 16%. -->
+    <color name="ms_bar">#00A63E</color>
+    <color name="ms_done">#00BC7D</color>
+    <color name="ms_todo">#FF6900</color>
+    <color name="ms_working">#F0B100</color>
+    <color name="ms_track">#29F0F0F0</color>
+</resources>

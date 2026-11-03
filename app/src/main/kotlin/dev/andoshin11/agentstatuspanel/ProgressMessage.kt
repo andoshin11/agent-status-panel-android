@@ -1,5 +1,20 @@
 package dev.andoshin11.agentstatuspanel
 
+import org.json.JSONArray
+import org.json.JSONException
+
+enum class TaskStatus(val code: String) {
+    COMPLETED("c"),
+    IN_PROGRESS("i"),
+    PENDING("p");
+
+    companion object {
+        fun fromCode(code: String) = entries.firstOrNull { it.code == code } ?: PENDING
+    }
+}
+
+data class TaskRow(val status: TaskStatus, val subject: String)
+
 /** A message from agent-status-panel. Its format is described in that repository's README. */
 sealed interface ProgressMessage {
     val id: String
@@ -17,6 +32,7 @@ sealed interface ProgressMessage {
         val step: String,
         val done: Int,
         val total: Int,
+        val tasks: List<TaskRow> = emptyList(),
     ) : ProgressMessage
 
     companion object {
@@ -42,9 +58,24 @@ sealed interface ProgressMessage {
                         step = data["step"].orEmpty(),
                         done = done,
                         total = total,
+                        tasks = parseTasks(data["tasks"]),
                     )
                 }
                 else -> null
+            }
+        }
+
+        /** The list is only for display, so a bad one costs the list and not the message. */
+        private fun parseTasks(text: String?): List<TaskRow> {
+            if (text.isNullOrEmpty()) return emptyList()
+            return try {
+                val list = JSONArray(text)
+                List(list.length()) { index ->
+                    val row = list.getJSONArray(index)
+                    TaskRow(TaskStatus.fromCode(row.getString(0)), row.getString(1))
+                }
+            } catch (_: JSONException) {
+                emptyList()
             }
         }
     }

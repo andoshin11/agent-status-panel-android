@@ -26,7 +26,7 @@ class SessionLedger(entries: Map<String, Long>, dismissed: Set<String>) {
                 dismissedIds.remove(message.id)
                 Decision.SHOW
             }
-            message.id in dismissedIds -> Decision.IGNORE
+            message.id in dismissedIds -> Decision.HIDE
             else -> Decision.SHOW
         }
     }
@@ -41,5 +41,6 @@ class SessionLedger(entries: Map<String, Long>, dismissed: Set<String>) {
         dismissedIds.removeAll(old)
     }
 
-    enum class Decision { SHOW, REMOVE, IGNORE }
+    /** HIDE is an up-to-date message with no notification: the widget still follows the session. */
+    enum class Decision { SHOW, REMOVE, HIDE, IGNORE }
 }
