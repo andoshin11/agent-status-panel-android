@@ -12,6 +12,12 @@ class ProgressMessagingService : FirebaseMessagingService() {
         val message = ProgressMessage.parse(remote.data) ?: return
         val now = System.currentTimeMillis()
         if (!LedgerStore(this).update(now) { it.accept(message) }) return
+        val notifier = AttentionNotifier(this)
+        when (message) {
+            is ProgressMessage.Attention -> notifier.show(message)
+            is ProgressMessage.Ended -> notifier.remove(message.id)
+            is ProgressMessage.Update -> Unit
+        }
         SessionStore(this).apply(message, now)
         AgentWidgetProvider.refresh(this)
     }

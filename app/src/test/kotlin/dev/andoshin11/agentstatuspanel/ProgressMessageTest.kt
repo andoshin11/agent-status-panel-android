@@ -56,6 +56,16 @@ class ProgressMessageTest {
     }
 
     @Test
+    fun `reads an attention message and the mark on a session`() {
+        assertEquals(
+            ProgressMessage.Attention("x", 100, "app", "permission"),
+            ProgressMessage.parse(mapOf("v" to "1", "id" to "x", "at" to "100", "state" to "attention", "workspace" to "app", "reason" to "permission")),
+        )
+        val update = ProgressMessage.parse(mapOf("v" to "1", "id" to "x", "at" to "100", "state" to "active", "done" to "0", "total" to "0", "attention" to "waiting"))
+        assertEquals("waiting", (update as ProgressMessage.Update).attention)
+    }
+
+    @Test
     fun `refuses what it does not understand`() {
         assertNull(ProgressMessage.parse(active + ("v" to "2")))
         assertNull(ProgressMessage.parse(active - "id"))

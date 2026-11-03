@@ -57,6 +57,15 @@ class SessionBoardTest {
     }
 
     @Test
+    fun `a session waiting for the user comes first, and an alert does not touch the board`() {
+        val waiting = update("wait", 30, finished = true).copy(attention = "waiting")
+        val sessions = board(update("a", 10), waiting)
+        assertEquals(listOf("wait", "a"), SessionBoard.ordered(sessions).map { it.id })
+        assertEquals(sessions, SessionBoard.apply(sessions, ProgressMessage.Attention("attention-x", 40, "w", "waiting")))
+        assertEquals(sessions, SessionBoard.fromJson(SessionBoard.toJson(sessions)))
+    }
+
+    @Test
     fun `the running state comes from the step or the list`() {
         assertTrue(board(update("a", 1))[0].running)
         assertFalse(board(update("a", 1, step = ""))[0].running)
