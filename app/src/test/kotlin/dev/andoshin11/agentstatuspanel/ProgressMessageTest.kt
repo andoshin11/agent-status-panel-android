@@ -34,6 +34,28 @@ class ProgressMessageTest {
     }
 
     @Test
+    fun `reads the task list`() {
+        val message = ProgressMessage.parse(active + ("tasks" to """[["c","A"],["i","B"],["p","C"],["x","D"]]"""))
+        assertEquals(
+            listOf(
+                TaskRow(TaskStatus.COMPLETED, "A"),
+                TaskRow(TaskStatus.IN_PROGRESS, "B"),
+                TaskRow(TaskStatus.PENDING, "C"),
+                TaskRow(TaskStatus.PENDING, "D"),
+            ),
+            (message as ProgressMessage.Update).tasks,
+        )
+    }
+
+    @Test
+    fun `a missing or bad list costs only the list`() {
+        assertEquals(emptyList<TaskRow>(), (ProgressMessage.parse(active) as ProgressMessage.Update).tasks)
+        val bad = ProgressMessage.parse(active + ("tasks" to "not json")) as ProgressMessage.Update
+        assertEquals(emptyList<TaskRow>(), bad.tasks)
+        assertEquals("Ship", bad.goal)
+    }
+
+    @Test
     fun `refuses what it does not understand`() {
         assertNull(ProgressMessage.parse(active + ("v" to "2")))
         assertNull(ProgressMessage.parse(active - "id"))
