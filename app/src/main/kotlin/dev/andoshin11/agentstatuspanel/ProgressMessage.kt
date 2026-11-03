@@ -33,6 +33,8 @@ sealed interface ProgressMessage {
         val done: Int,
         val total: Int,
         val tasks: List<TaskRow> = emptyList(),
+        /** False for a session only the widget shows: idle, or finished before it was live. */
+        val live: Boolean = true,
     ) : ProgressMessage
 
     companion object {
@@ -59,6 +61,7 @@ sealed interface ProgressMessage {
                         done = done,
                         total = total,
                         tasks = parseTasks(data["tasks"]),
+                        live = data["live"] != "0",
                     )
                 }
                 else -> null

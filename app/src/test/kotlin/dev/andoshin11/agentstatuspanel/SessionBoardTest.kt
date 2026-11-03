@@ -6,8 +6,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class SessionBoardTest {
-    private fun update(id: String, at: Long, finished: Boolean = false, step: String = "s", tasks: List<TaskRow> = emptyList()) =
-        ProgressMessage.Update(id, at, finished, "claude", "w-$id", "g", step, 1, 2, tasks)
+    private fun update(id: String, at: Long, finished: Boolean = false, step: String = "s", tasks: List<TaskRow> = emptyList(), live: Boolean = true) =
+        ProgressMessage.Update(id, at, finished, "claude", "w-$id", "g", step, 1, 2, tasks, live)
 
     private fun board(vararg messages: ProgressMessage) =
         messages.fold(emptyList<WidgetSession>(), SessionBoard::apply)
@@ -49,6 +49,14 @@ class SessionBoardTest {
     }
 
     @Test
+    fun `an idle session stays on the board for days, below the live ones`() {
+        val sessions = board(update("idle", 10, live = false), update("doneIdle", 11, finished = true, live = false), update("new", 20))
+        assertEquals(listOf("new", "idle", "doneIdle"), SessionBoard.ordered(sessions).map { it.id })
+        val days = 7L * 24 * 60 * 60 * 1000
+        assertEquals(3, SessionBoard.fresh(sessions, days).size)
+    }
+
+    @Test
     fun `the running state comes from the step or the list`() {
         assertTrue(board(update("a", 1))[0].running)
         assertFalse(board(update("a", 1, step = ""))[0].running)
@@ -58,7 +66,7 @@ class SessionBoardTest {
 
     @Test
     fun `sessions survive being saved`() {
-        val sessions = board(update("a", 10, tasks = tasks(1, 3)), update("b", 20, finished = true))
+        val sessions = board(update("a", 10, tasks = tasks(1, 3)), update("b", 20, finished = true, live = false))
         assertEquals(sessions, SessionBoard.fromJson(SessionBoard.toJson(sessions)))
     }
 }
